@@ -17,13 +17,18 @@ const PersonForm = (props) => {
   )
 }
 
-const Persons = ({namesToShow, persons, setPersons}) => {
+const Persons = ({namesToShow, persons, setPersons, setErrorMessage}) => {
 
   const handleNameRemove = (deletedPerson) => {
     const result = window.confirm(`Delete ${deletedPerson.name} ?`);
     if (result) {
       personService.remove(deletedPerson.id)
-      .then(response => setPersons(persons.filter(person => person.id !== deletedPerson.id)))
+      .then(() => setPersons(persons.filter(person => person.id !== deletedPerson.id)))
+      .catch(() => {
+        setErrorMessage(`Information of ${deletedPerson.name} has already been removed from the server`)
+        setPersons(persons.filter(n => n.id !== deletedPerson.id))
+        setTimeout(() => { setErrorMessage(null) }, 5000)
+      })
     }
   }
 
@@ -36,11 +41,57 @@ const Persons = ({namesToShow, persons, setPersons}) => {
   )
 }
 
+const SuccessNotification = ({message}) => {
+  if (message === null) {
+    return null
+  }
+
+  const successMessageStyle = {
+    color: 'green',
+    background: 'lightgrey',
+    fontSize: '20px',
+    borderStyle: 'solid',
+    borderRadius: '5px',
+    padding: '10px',
+    marginBottom: '10px'
+  }
+
+  return (
+    <div style={successMessageStyle}>
+      {message}
+    </div>
+  )
+}
+
+const ErrorNotification = ({message}) => {
+  if (message === null) {
+    return null
+  }
+
+  const errorMessageStyle = {
+    color: 'red',
+    background: 'lightgrey',
+    fontSize: '20px',
+    borderStyle: 'solid',
+    borderRadius: '5px',
+    padding: '10px',
+    marginBottom: '10px'
+  }
+
+  return (
+    <div style={errorMessageStyle}>
+      {message}
+    </div>
+  )
+}
+
 const App = () => {
-  const [persons, setPersons] = useState([]) 
+  const [ persons, setPersons ] = useState([]) 
   const [ newName, setNewName ] = useState('')
   const [ newNumber, setNewNumber ] = useState('')
   const [ nameFilter, setNameFilter ] = useState('')
+  const [ successMessage, setSuccessMessage] = useState(null);
+  const [ errorMessage, setErrorMessage] = useState(null);
 
   useEffect(() => {
     personService.getAll()
@@ -55,12 +106,17 @@ const App = () => {
         personService.update(person.id, {name: newName, number: newNumber })
          .then(response => {
            setPersons(persons.map(x => x.id !== person.id ? x : response))
+           setSuccessMessage(`Updated ${newName}! `)
+           setTimeout(() => { setSuccessMessage(null) }, 5000)
          })
       }
     } else {
       const newPerson = {name: newName, number: newNumber}
       personService.create(newPerson)
-       .then(response => { setPersons(persons.concat(response)) })
+       .then(response => { setPersons(persons.concat(response)) 
+        setSuccessMessage(`Added ${newName}! `)
+        setTimeout(() => { setSuccessMessage(null) }, 5000)
+      })
     }
   }
 
@@ -81,6 +137,8 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+      <SuccessNotification message={successMessage}/>
+      <ErrorNotification message={errorMessage}/>
       <Filter nameFilter={nameFilter} handleFilterChange={handleFilterChange} />
       <h3>add a new</h3>
       <PersonForm
@@ -91,7 +149,7 @@ const App = () => {
         addPerson={addPerson}
       />
       <h3>Numbers</h3>
-      <Persons namesToShow={namesToShow} persons={persons} setPersons={setPersons}/>
+      <Persons namesToShow={namesToShow} persons={persons} setPersons={setPersons} setErrorMessage={setErrorMessage} />
     </div>
   )
 }

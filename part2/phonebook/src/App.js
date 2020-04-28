@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import axios from 'axios'
+import personService from './services/persons'
 
 const Filter = (props) => {
   return (
@@ -17,11 +17,20 @@ const PersonForm = (props) => {
   )
 }
 
-const Persons = ({namesToShow}) => {
+const Persons = ({namesToShow, persons, setPersons}) => {
+
+  const handleNameRemove = (deletedPerson) => {
+    const result = window.confirm(`Delete ${deletedPerson.name} ?`);
+    if (result) {
+      personService.remove(deletedPerson.id)
+      .then(response => setPersons(persons.filter(person => person.id !== deletedPerson.id)))
+    }
+  }
+
   return (
     <div>
       {namesToShow.map(person => 
-        <p key={person.name}>{person.name} {person.number}</p>
+        <p key={person.name}>{person.name} {person.number} <button onClick={() => handleNameRemove(person)}>delete</button></p>
       )}
     </div>
   )
@@ -34,19 +43,24 @@ const App = () => {
   const [ nameFilter, setNameFilter ] = useState('')
 
   useEffect(() => {
-    axios.get('http://localhost:3001/persons')
-      .then(response => {
-        console.log(response);
-        setPersons(response.data);
-      })
-  }, [])
+    personService.getAll()
+     .then(allPersons => setPersons(allPersons)) }, [])
 
   const addPerson = (event) => {
     event.preventDefault();
     if (persons.some(person => person.name === newName)) {
-      window.alert(`${newName} is already added to phonebook`);
+      const result = window.confirm(`${newName} is already added to phonebook, replace the old number with a new one?`);
+      if (result) {
+        const person = persons.find(person => person.name === newName);
+        personService.update(person.id, {name: newName, number: newNumber })
+         .then(response => {
+           setPersons(persons.map(x => x.id !== person.id ? x : response))
+         })
+      }
     } else {
-      setPersons(persons.concat({name: newName, number: newNumber}));
+      const newPerson = {name: newName, number: newNumber}
+      personService.create(newPerson)
+       .then(response => { setPersons(persons.concat(response)) })
     }
   }
 
@@ -77,7 +91,7 @@ const App = () => {
         addPerson={addPerson}
       />
       <h3>Numbers</h3>
-      <Persons namesToShow={namesToShow} />
+      <Persons namesToShow={namesToShow} persons={persons} setPersons={setPersons}/>
     </div>
   )
 }

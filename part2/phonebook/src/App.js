@@ -117,6 +117,10 @@ const App = () => {
         setSuccessMessage(`Added ${newName}! `)
         setTimeout(() => { setSuccessMessage(null) }, 5000)
       })
+      .catch(error => {
+        setErrorMessage(error)
+        setTimeout(() => { setErrorMessage(null) }, 5000)
+      })
     }
   }
 

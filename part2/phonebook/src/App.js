@@ -35,7 +35,7 @@ const Persons = ({namesToShow, persons, setPersons, setErrorMessage}) => {
   return (
     <div>
       {namesToShow.map(person => 
-        <p key={person.name}>{person.name} {person.number} <button onClick={() => handleNameRemove(person)}>delete</button></p>
+        <p key={person.id}>{person.name} {person.number} <button onClick={() => handleNameRemove(person)}>delete</button></p>
       )}
     </div>
   )

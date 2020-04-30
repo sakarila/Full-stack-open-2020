@@ -1,0 +1,9 @@
+POST http://localhost:3003/api/blogs
+Content-Type: application/json
+
+{
+    "title": "Fullstack Architecture",
+    "author": "Marjo Manninen",
+    "url": "www.fullstackopen.com",
+    "likes": 28
+}

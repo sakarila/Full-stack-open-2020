@@ -3,6 +3,8 @@ const supertest = require('supertest')
 const app = require('../app')
 const Blog = require('../models/blog')
 
+mongoose.set('useCreateIndex', true);
+
 const api = supertest(app)
 
 const initialBlogs = [

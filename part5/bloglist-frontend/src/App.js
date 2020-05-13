@@ -1,67 +1,26 @@
 import React, { useState, useEffect } from 'react'
 import Blog from './components/Blog'
+import ErrorNotification from './components/ErrorNotification'
+import SuccessNotification from './components/SuccessNotification'
 import blogService from './services/blogs'
 import loginService from './services/login'
-
-const SuccessNotification = ({message}) => {
-  if (message === null) {
-    return null
-  }
-
-  const successMessageStyle = {
-    color: 'green',
-    background: 'lightgrey',
-    fontSize: '20px',
-    borderStyle: 'solid',
-    borderRadius: '5px',
-    padding: '10px',
-    marginBottom: '10px'
-  }
-
-  return (
-    <div style={successMessageStyle}>
-      {message}
-    </div>
-  )
-}
-
-const ErrorNotification = ({message}) => {
-  if (message === null) {
-    return null
-  }
-
-  const errorMessageStyle = {
-    color: 'red',
-    background: 'lightgrey',
-    fontSize: '20px',
-    borderStyle: 'solid',
-    borderRadius: '5px',
-    padding: '10px',
-    marginBottom: '10px'
-  }
-
-  return (
-    <div style={errorMessageStyle}>
-      {message}
-    </div>
-  )
-}
+import Togglable from './components/Togglable'
+import BlogForm from './components/BlogForm'
 
 const App = () => {
   const [blogs, setBlogs] = useState([])
   const [user, setUser] = useState(null)
-  const [username, setUsername] = useState('') 
+  const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
-  const [title, setTitle] = useState('') 
-  const [author, setAuthor] = useState('')
-  const [url, setUrl] = useState('')
-  const [ successMessage, setSuccessMessage] = useState(null);
-  const [ errorMessage, setErrorMessage] = useState(null);
+  const [successMessage, setSuccessMessage] = useState(null)
+  const [errorMessage, setErrorMessage] = useState(null)
+
+  const blogFormRef = React.createRef()
 
   useEffect(() => {
     blogService.getAll().then(blogs =>
       setBlogs( blogs )
-    )  
+    )
   }, [])
 
   useEffect(() => {
@@ -84,16 +43,16 @@ const App = () => {
 
       window.localStorage.setItem(
         'loggedBlogappUser', JSON.stringify(user)
-      ) 
+      )
       setUser(user)
       setUsername('')
       setPassword('')
     } catch (exception) {
-        setErrorMessage("Wrong username or password")
-        setTimeout(() => {
-          setErrorMessage(null)
+      setErrorMessage('Wrong username or password')
+      setTimeout(() => {
+        setErrorMessage(null)
       }, 5000)
-    } 
+    }
   }
 
   const handleLogout = () => {
@@ -101,9 +60,8 @@ const App = () => {
     setUser(null)
   }
 
-  const createNewBlog = async (event) => {
-    event.preventDefault()
-
+  const createNewBlog = async ({ title, author, url }) => {
+    blogFormRef.current.toggleVisibility()
     try {
       const blog = await blogService.createNew({
         title, author, url
@@ -111,19 +69,17 @@ const App = () => {
       setSuccessMessage(`a new blog ${title} by ${author} added!`)
       setTimeout(() => {
         setSuccessMessage(null)
-    }, 5000)
+      }, 5000)
 
       setBlogs(blogs.concat(blog))
-      setTitle('')
-      setAuthor('')
-      setUrl('')
+
     } catch (exception) {
       console.log(exception)
-        setErrorMessage(exception)
-        setTimeout(() => {
-          setErrorMessage(null)
-      }, 5000) 
-    } 
+      setErrorMessage(exception)
+      setTimeout(() => {
+        setErrorMessage(null)
+      }, 5000)
+    }
   }
 
   if (user === null) {
@@ -131,10 +87,10 @@ const App = () => {
       <div>
         <h2>Log in to application</h2>
         <ErrorNotification message={errorMessage}/>
-          <form onSubmit={handleLogin}>
+        <form onSubmit={handleLogin}>
           <div>
             username
-              <input
+            <input
               type="text"
               value={username}
               name="Username"
@@ -143,7 +99,7 @@ const App = () => {
           </div>
           <div>
             password
-              <input
+            <input
               type="password"
               value={password}
               name="Password"
@@ -151,7 +107,7 @@ const App = () => {
             />
           </div>
           <button type="submit">login</button>
-        </form>      
+        </form>
       </div>
     )
   }
@@ -163,39 +119,11 @@ const App = () => {
       <SuccessNotification message={successMessage}/>
       <ErrorNotification message={errorMessage}/>
       <p>{user.name} logged in <button onClick={handleLogout}>logout</button></p>
-      <h2>create new</h2>
-        <form onSubmit={createNewBlog}>
-          <div>
-            title:
-              <input
-              type="text"
-              value={title}
-              name="Title"
-              onChange={({ target }) => setTitle(target.value)}
-            />
-          </div>
-          <div>
-            author:
-              <input
-              type="text"
-              value={author}
-              name="Author"
-              onChange={({ target }) => setAuthor(target.value)}
-            />
-          </div>
-          <div>
-            url:
-              <input
-              type="text"
-              value={url}
-              name="Url"
-              onChange={({ target }) => setUrl(target.value)}
-            />
-          </div>
-          <button type="submit">create</button>
-        </form>  
-      {blogs.map(blog =>
-        <Blog key={blog.id} blog={blog} />
+      <Togglable buttonLabel="new blog" ref={blogFormRef}>
+        <BlogForm createNewBlog={createNewBlog}/>
+      </Togglable>
+      {blogs.sort((a, b) => b.likes - a.likes).map(blog =>
+        <Blog key={blog.id} blog={blog} blogs={blogs} setBlogs={setBlogs} />
       )}
     </div>
   )

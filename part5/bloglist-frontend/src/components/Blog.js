@@ -1,11 +1,9 @@
 import React, { useState } from 'react'
 import blogService from '../services/blogs'
 
-const Blog = ({ blog, blogs, setBlogs }) => {
+const Blog = ({ blog, blogs, setBlogs, username }) => {
   const [detailsVisible, setDetailsVisible] = useState(false)
   const [likes, setLikes] = useState(blog.likes)
-
-  const username = JSON.parse(window.localStorage.getItem('loggedBlogappUser')).username
 
   const blogStyle = {
     paddingTop: 10,
@@ -25,7 +23,7 @@ const Blog = ({ blog, blogs, setBlogs }) => {
     setLikes(likes + 1)
   }
 
-  const deleteBlog = async () => {
+  const deleteBlog = async (blog) => {
     if(window.confirm(`Remove blog ${blog.title} by ${blog.author}`)) {
       blogService.deleteBlog(blog.id)
       setBlogs(blogs.filter(x => x.id !== blog.id))
@@ -37,11 +35,11 @@ const Blog = ({ blog, blogs, setBlogs }) => {
 
   return (
     <div style={blogStyle}>
-      <div>
+      <div className='basicInfo'>
         {blog.title} {blog.author}
         <button onClick={toggleVisibility}>{detailsVisible ? 'hide' : 'view'}</button>
       </div>
-      <div style={showWhenVisible} >
+      <div style={showWhenVisible} className='extraInfo' >
         {blog.url}
         <br/>
         Likes: {likes} <button onClick={addLike}>like</button>

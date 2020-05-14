@@ -3,7 +3,6 @@ import '@testing-library/jest-dom/extend-expect'
 import { render, fireEvent } from '@testing-library/react'
 import Blog from './Blog'
 
-
 describe('<Blog />', () => {
   let component
 
@@ -42,5 +41,31 @@ describe('<Blog />', () => {
 
     const div = component.container.querySelector('.extraInfo')
     expect(div).not.toHaveStyle('display: none')
+  })
+
+  test('if like button is clicked twice, the event handler should also be called twice', () => {
+    const blog = {
+      author: 'Timo Nieminen',
+      id: '5ebbb14a6f22af56f0fe6455',
+      likes: 5,
+      title: 'testi',
+      url: 'www.hs.fi',
+      user: {
+        id: '5eb98a6c31dbd97b1c8098f2',
+        name: 'Janne Nieminen',
+        username: 'testi'
+      }
+    }
+    const mockHandler = jest.fn()
+
+    component = render(
+      <Blog blog={blog} addLike={mockHandler} />
+    )
+
+    const button = component.container.querySelector('.likeButton')
+    fireEvent.click(button)
+    fireEvent.click(button)
+
+    expect(mockHandler.mock.calls).toHaveLength(2)
   })
 })

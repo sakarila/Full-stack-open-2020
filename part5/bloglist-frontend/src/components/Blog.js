@@ -1,9 +1,7 @@
 import React, { useState } from 'react'
-import blogService from '../services/blogs'
 
-const Blog = ({ blog, blogs, setBlogs, username }) => {
+const Blog = ({ blog, username, addLike, deleteBlog }) => {
   const [detailsVisible, setDetailsVisible] = useState(false)
-  const [likes, setLikes] = useState(blog.likes)
 
   const blogStyle = {
     paddingTop: 10,
@@ -15,19 +13,6 @@ const Blog = ({ blog, blogs, setBlogs, username }) => {
 
   const toggleVisibility = () => {
     setDetailsVisible(!detailsVisible)
-  }
-
-  const addLike = () => {
-    blog.likes = blog.likes + 1
-    blogService.updateBlog(blog)
-    setLikes(likes + 1)
-  }
-
-  const deleteBlog = async (blog) => {
-    if(window.confirm(`Remove blog ${blog.title} by ${blog.author}`)) {
-      blogService.deleteBlog(blog.id)
-      setBlogs(blogs.filter(x => x.id !== blog.id))
-    }
   }
 
   const showWhenVisible = { display: detailsVisible ? '' : 'none' }
@@ -42,11 +27,11 @@ const Blog = ({ blog, blogs, setBlogs, username }) => {
       <div style={showWhenVisible} className='extraInfo' >
         {blog.url}
         <br/>
-        Likes: {likes} <button onClick={addLike}>like</button>
+        Likes: {blog.likes} <button className={'likeButton'} onClick={addLike}>like</button>
         <br/>
         {blog.user.name}
         <br/>
-        <button style={showDeleteButton} onClick={deleteBlog}>remove</button>
+        <button style={showDeleteButton} className={'deleteButton'} onClick={deleteBlog}>remove</button>
       </div>
     </div>
   )

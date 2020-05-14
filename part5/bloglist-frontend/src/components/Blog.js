@@ -19,12 +19,12 @@ const Blog = ({ blog, username, addLike, deleteBlog }) => {
   const showDeleteButton = { display: blog.user.username === username ? '' : 'none' }
 
   return (
-    <div style={blogStyle}>
+    <div className='blog-post' style={blogStyle}>
       <div className='basicInfo'>
         {blog.title} {blog.author}
         <button onClick={toggleVisibility}>{detailsVisible ? 'hide' : 'view'}</button>
       </div>
-      <div style={showWhenVisible} className='extraInfo' >
+      <div id="extra-info" style={showWhenVisible} className='extraInfo' >
         {blog.url}
         <br/>
         Likes: {blog.likes} <button className={'likeButton'} onClick={addLike}>like</button>

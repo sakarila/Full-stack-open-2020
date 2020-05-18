@@ -15,6 +15,13 @@ export const setMessage = (message) => {
     }
 }
 
+export const setNotification = (message, time) => {
+    return async dispatch => {
+        await dispatch(setMessage(message))
+        setTimeout(() => { dispatch(clearMessage()) }, time * 1000)
+    }
+}
+
 export const clearMessage = () => {
     return {
         type: 'CLEAR_MESSAGE'

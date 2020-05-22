@@ -3,6 +3,7 @@ import {
   BrowserRouter as Router,
   Switch, Route, Link, useParams, useHistory
 } from "react-router-dom"
+import { useField } from './hooks/index'
 
 const Menu = () => {
   const padding = {
@@ -68,20 +69,27 @@ const Footer = () => (
 
 const CreateNew = (props) => {
   let history = useHistory()
-  const [content, setContent] = useState('')
-  const [author, setAuthor] = useState('')
-  const [info, setInfo] = useState('')
+  const content = useField('content')
+  const author = useField('author')
+  const info = useField('info')
 
 
   const handleSubmit = (e) => {
     e.preventDefault()
     props.addNew({
-      content,
-      author,
-      info,
+      content: content.properties.value,
+      author: author.properties.value,
+      info: info.properties.value,
       votes: 0
     })
     history.push('/')
+  }
+
+  const handleCancel = (e) => {
+    e.preventDefault()
+    content.reset()
+    author.reset()
+    info.reset()
   }
 
   return (
@@ -90,17 +98,18 @@ const CreateNew = (props) => {
       <form onSubmit={handleSubmit}>
         <div>
           content
-          <input name='content' value={content} onChange={(e) => setContent(e.target.value)} />
+          <input {...content.properties} />
         </div>
         <div>
           author
-          <input name='author' value={author} onChange={(e) => setAuthor(e.target.value)} />
+          <input {...author.properties} />
         </div>
         <div>
           url for more info
-          <input name='info' value={info} onChange={(e)=> setInfo(e.target.value)} />
+          <input {...info.properties} />
         </div>
         <button>create</button>
+        <button onClick={handleCancel}>cancel</button>
       </form>
     </div>
   )
@@ -129,6 +138,7 @@ const App = () => {
   const addNew = (anecdote) => {
     anecdote.id = (Math.random() * 10000).toFixed(0)
     setAnecdotes(anecdotes.concat(anecdote))
+
     setNotification(`a new anecdote ${anecdote.content} created!`)
     setTimeout(() => { setNotification('') }, 10000)
   }

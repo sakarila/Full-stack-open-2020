@@ -21,6 +21,7 @@ const Authors = (props) => {
   }
 
   const authors = result.data.allAuthors
+  const token = localStorage.getItem('user-token')
 
   const submit = async (event) => {
     event.preventDefault()
@@ -55,26 +56,26 @@ const Authors = (props) => {
           )}
         </tbody>
       </table>
-      <h2>Set birthyear</h2>
-      <div>
-      <form onSubmit={submit}>
-        <div>
-          name
-          <input
-            value={author}
-            onChange={({ target }) => setAuhtor(target.value)}
-          />
-        </div>
-        <div>
-          born
-          <input
-            type='born'
-            value={birthYear}
-            onChange={({ target }) => setBirthYear(target.value)}
-          />
-        </div>
-        <button type='submit'>update author</button>
-      </form>
+      <div style={!token ? {display: 'none'} : {}}>
+        <h2>Set birthyear</h2>
+        <form onSubmit={submit}>
+          <div>
+            name
+            <input
+              value={author}
+              onChange={({ target }) => setAuhtor(target.value)}
+            />
+          </div>
+          <div>
+            born
+            <input
+              type='born'
+              value={birthYear}
+              onChange={({ target }) => setBirthYear(target.value)}
+            />
+          </div>
+          <button type='submit'>update author</button>
+        </form>
       </div>
     </div>
   )

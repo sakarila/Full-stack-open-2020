@@ -1,4 +1,4 @@
-const { ApolloServer, gql } = require('apollo-server')
+const { ApolloServer, AuthenticationError, gql } = require('apollo-server')
 const mongoose = require('mongoose')
 const { v1: uuid } = require('uuid')
 const Book = require('./models/book')
@@ -49,6 +49,8 @@ const typeDefs = gql`
     authorCount: Int!
     allBooks(author: String, genre: String): [Book!]!
     allAuthors: [Author!]!
+    allGenres(genre: String): [String!]!
+    recommendedBooks: [Book!]!
     me: User
   }
   type Mutation {
@@ -84,11 +86,30 @@ const resolvers = {
       }
       return filteredBooks
     },
+    recommendedBooks: async (root, args, {currentUser} ) => {
+      let filteredBooks = await Book.find({}).populate('author')
+      filteredBooks = filteredBooks.filter((book) => book.genres.find((genre) => genre === currentUser.favoriteGenre))
+      return filteredBooks
+    },
     allAuthors: (root, args) => {
       return Author.find({})
     },
     me: (root, args, context) => {
       return context.currentUser
+    },
+    allGenres: async (root, args) => {
+      const books = await Book.find({})
+      let genres = []
+      books.forEach(book => {
+        book.genres.forEach(genre => genres.push(genre))
+      })
+
+      if (args.genre) {
+        genres = genres.filter((genre) => genre === args.genre)
+      }
+
+      const uniqueGenres = [...new Set(genres)]
+      return uniqueGenres
     }
   },
   Author: {
@@ -126,7 +147,7 @@ const resolvers = {
       if (!currentUser) {
         throw new AuthenticationError("not authenticated")
       }
-      
+
       const author = await Author.findOne({ name: args.author })
       const book = new Book({ ...args, author: author})
       try {

@@ -4,13 +4,8 @@ import { ALL_BOOKS, ALL_GENRES } from '../queries'
 
 const Books = (props) => {
   const [genre, setGenre] = useState("Programming")
-  const [getBooks, resultBooks] = useLazyQuery(ALL_BOOKS)
-  const [getGenres, resultGenres] = useLazyQuery(ALL_GENRES)
-
-  useEffect(() => {
-    getBooks()
-    getGenres()
-  }, [])
+  const resultBooks = useQuery(ALL_BOOKS)
+  const resultGenres = useQuery(ALL_GENRES)
 
   if (!props.show) {
     return null
@@ -21,7 +16,6 @@ const Books = (props) => {
   }
 
   const books = resultBooks.data.allBooks
-  console.log(books)
   const genres = resultGenres.data.allGenres
 
   const changeGenre = (event) => {

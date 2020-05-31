@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
@@ -9,13 +10,13 @@ So I disabled some of the eslint-checks to get this implementation to work
 */
 
 
-import { NewPatientEntry, Gender } from './types';
+import { NewPatient, Gender, HealthCheckRating } from './types';
 
-const isDate = (date: string): boolean => {
+export const isDate = (date: string): boolean => {
     return Boolean(Date.parse(date));
   };
 
-const isString = (text: any): text is string => {
+export const isString = (text: any): text is string => {
     return typeof text === 'string' || text instanceof String;
 };
 
@@ -30,6 +31,35 @@ const parseName = (name: any): string => {
     return name;
 };
 
+export const checkHealthCheckRating = (healthCheckRating: any): boolean => {
+  if (!Object.values(HealthCheckRating).includes(healthCheckRating)) {
+    console.log(Object.values(HealthCheckRating).includes(healthCheckRating));
+    throw new Error('Incorrect or missing healthcheck-rating');
+  }
+  return true;
+};
+
+export const checkEmployerName = (employerName: any): boolean => {
+  if (!employerName || !isString(employerName)) {
+    throw new Error('Incorrect or missing employer name');
+  }
+  return true;
+};
+
+export const checkDescription = (description: any): boolean => {
+  if (!description || !isString(description)) {
+    throw new Error('Incorrect or missing description');
+  }
+  return true;
+};
+
+export const checkSpecialist = (specialist: any): boolean => {
+  if (!specialist || !isString(specialist)) {
+    throw new Error('Incorrect or missing specialist');
+  }
+  return true;
+};
+
 const parseSSN = (ssn: any): string => {
     if (!ssn || !isString(ssn)) {
       throw new Error('Incorrect or missing ssn');
@@ -37,11 +67,11 @@ const parseSSN = (ssn: any): string => {
     return ssn;
 };
 
-const parseDateOfBirth = (dateOfBirth: any): string => {
-    if (!dateOfBirth || !isString(dateOfBirth) || !isDate(dateOfBirth)) {
+const parseDate = (date: any): string => {
+    if (!date || !isString(date) || !isDate(date)) {
       throw new Error('Incorrect or missing date of birth');
     }
-    return dateOfBirth;
+    return date;
 };
 
 const parseGender = (gender: any): string => {
@@ -58,15 +88,13 @@ const parseOccupation = (occupation: any): string => {
     return occupation;
 };
 
-const toNewPatientEntry = (object: any): NewPatientEntry => {
-  const newEntry: NewPatientEntry = {
+export const toNewPatient = (object: any): NewPatient => {
+  const newpatient: NewPatient = {
     name: parseName(object.name),
     ssn: parseSSN(object.ssn),
-    dateOfBirth: parseDateOfBirth(object.dateOfBirth),
+    dateOfBirth: parseDate(object.dateOfBirth),
     gender: parseGender(object.gender),
     occupation: parseOccupation(object.occupation)
   };
-  return newEntry;
+  return newpatient;
 };
-
-export default toNewPatientEntry;
